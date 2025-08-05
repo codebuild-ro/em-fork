@@ -157,8 +157,8 @@ export const MIN_LINE_HEIGHT = 26
 // the maximum number of characters of a thought to display before ellipsizing in links and tutorial
 export const THOUGHT_ELLIPSIZED_CHARS = 16
 
-// delay after gesture hint is activated before command palette appears
-export const COMMAND_PALETTE_TIMEOUT = 400
+// delay for showing gesture palette after gesture is executed
+export const COMMAND_PALETTE_TIMEOUT = 800
 
 // number of recently edited thoughts to store
 export const RECENTLY_EDITED_THOUGHTS_LIMIT = 100

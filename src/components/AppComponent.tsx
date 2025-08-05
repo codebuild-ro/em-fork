@@ -1,6 +1,5 @@
 import { Capacitor } from '@capacitor/core'
 import { StatusBar, Style } from '@capacitor/status-bar'
-import _ from 'lodash'
 import React, { FC, PropsWithChildren, useEffect, useLayoutEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { WebviewBackground } from 'webview-background'
@@ -85,11 +84,17 @@ const shouldCancelGesture = (
 
 /**
  * Wrap an element in the MultiGesture component if the user has a touch screen.
+ * 
+ * Passes experienceMode to MultiGesture to control gesture alert behavior:
+ * - Training mode: Shows gesture hints and command palette
+ * - Experience mode: Clean execution without alerts
  */
 const MultiGestureIfTouch: FC<PropsWithChildren> = ({ children }) => {
   const leftHanded = useSelector(getUserSetting(Settings.leftHanded))
+  const experienceMode = useSelector(getUserSetting(Settings.experienceMode))
   return isTouch ? (
     <MultiGesture
+      experienceMode={experienceMode}
       leftHanded={leftHanded}
       onGesture={handleGestureSegment}
       onEnd={handleGestureEnd}

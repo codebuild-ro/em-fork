@@ -2,7 +2,7 @@ import React, { PropsWithChildren } from 'react'
 import { GestureResponderEvent, PanResponder, PanResponderInstance, View } from 'react-native'
 import Direction from '../@types/Direction'
 import GesturePath from '../@types/GesturePath'
-import { noop } from '../constants'
+import { COMMAND_PALETTE_TIMEOUT, noop } from '../constants'
 import gestureStore from '../stores/gesture'
 import isInGestureZone from '../util/isInGestureZone'
 import ScrollZone from './ScrollZone'
@@ -22,6 +22,8 @@ interface GestureState {
 
 // See: defaultProps for defaults
 type MultiGestureProps = PropsWithChildren<{
+  /** Controls gesture alert behavior: training mode shows hints, experience mode is clean */
+  experienceMode?: boolean
   // moves the scroll zone to the left side of the screen and the gesture zone to the right
   leftHanded?: boolean
   // fired when a new gesture is added to the sequence
@@ -242,7 +244,17 @@ class MultiGesture extends React.Component<MultiGestureProps> {
     this.scrollYStart = null
     this.disableScroll = false
     this.sequence = ''
-    gestureStore.update({ gesture: '' })
+
+    // Clear gesture store based on experience mode
+    // Experience mode: Clear immediately for clean execution
+    // Training mode: Clear after delay to allow command palette display
+    if (this.props.experienceMode) {
+      gestureStore.update({ gesture: '' })
+    } else {
+      setTimeout(() => {
+        gestureStore.update({ gesture: '' })
+      }, COMMAND_PALETTE_TIMEOUT)
+    }
   }
 
   render() {

@@ -179,20 +179,41 @@ export const commandById = (id: CommandId): Command => commandIdIndex[id]
  *
  * There are two alert types for gesture hints:
  * - GestureHint - The basic gesture hint that is shown immediately on swipe.
- * - CommandPaletteGesture - The command palette  that shows all possible gestures from the current sequence after a delay.
+ * - CommandPaletteGesture - The command palette that shows all possible gestures from the current sequence after a delay.
+ *
+ * Gesture Alert System:
+ * - handleGestureSegment: Shows basic gesture hints during gesture progress (training mode only)
+ * - handleGestureEnd: Shows command palette after gesture completion (training mode only)
+ * - handleGestureCancel: Clears all alerts when gesture is cancelled.
+ *
+ * User Experience Flow:
+ * 1. User starts gesture → No feedback
+ * 2. User performs swipes → Basic gesture hints show (training mode)
+ * 3. User completes gesture → Command palette appears (training mode)
+ * 4. Experience mode → No alerts, clean execution.
+ *
+ * This system ensures command palette only appears after gesture completion,
+ * not during gesture progress, providing a cleaner user experience.
  *
  * There is no automated test coverage since timers are so messed up in the current Jest version. It may be possible to write tests if Jest is upgraded. Manual test cases.
- * - Basic gesture hint.
- * - Preserve gesture hint for valid command.
- * - Only show "Cancel gesture" if gesture hint is already activated.
- * - Dismiss gesture hint after release for invalid command.
- * - command palette  on hold.
- * - command palette  from invalid gesture (e.g. ←↓, hold, ←↓←).
- * - Change command palette  to basic gesture hint on gesture end.
+ * - Basic gesture hint appears during gesture progress (training mode only).
+ * - Command palette appears after gesture completion (training mode only).
+ * - Gesture hint preserved for valid commands (except back/forward).
+ * - Gesture hint dismissed for invalid commands or back/forward gestures.
+ * - Command palette shown after gesture completion with delay.
+ * - Command palette cleared when gesture cancelled.
+ * - Haptic feedback on valid gesture segments.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const inputHandlers = (store: Store<State, any>) => ({
-  /** Handles gesture hints when a valid segment is entered. */
+  /**
+   * Handles basic gesture hints during gesture progress (training mode only).
+   *
+   * This function shows immediate feedback during gesture execution but does NOT
+   * show the command palette during gesture progress. The command palette is
+   * handled separately in handleGestureEnd to ensure it only appears after
+   * gesture completion.
+   */
   handleGestureSegment: ({ sequence }: { gesture: Direction | null; sequence: GesturePath }) => {
     const state = store.getState()
     const experienceMode = getUserSetting(state, Settings.experienceMode)
@@ -208,20 +229,20 @@ export const inputHandlers = (store: Store<State, any>) => ({
 
     const command = commandGestureIndex[sequence as string]
 
-    // basic gesture hint (training mode only)
+    // Show basic gesture hint during gesture progress (training mode only)
+    // Note: Command palette is NOT shown here - it's handled in handleGestureEnd
     if (
       !experienceMode &&
       // only show basic gesture hint if the command palette is not already being shown
       !state.showCommandPalette &&
-      // ignore back
+      // ignore back/forward gestures
       command?.id !== 'cursorBack' &&
-      // ignore forward
       command?.id !== 'cursorForward' &&
-      // only show
+      // only show for valid commands or existing gesture hints
       (command || state.alert?.alertType === AlertType.GestureHint)
     ) {
       store.dispatch(
-        // alert the command label if it is a valid gesture
+        // Show basic gesture hint with command label
         alert(command && command?.label, {
           alertType: AlertType.GestureHint,
           clearDelay: 5000,
@@ -229,30 +250,22 @@ export const inputHandlers = (store: Store<State, any>) => ({
         }),
       )
     }
-
-    // command palette
-    // alert after a delay of COMMAND_PALETTE_TIMEOUT
-    clearTimeout(commandPaletteGesture)
-    commandPaletteGesture = window.setTimeout(
-      () => {
-        store.dispatch((dispatch, getState) => {
-          // do not show "Cancel gesture" if already being shown by basic gesture hint
-          const state = getState()
-          if (state.showCommandPalette) return
-          dispatch(commandPalette())
-        })
-      },
-      // if the hint is already being shown, do not wait to change the value
-      COMMAND_PALETTE_TIMEOUT,
-    )
   },
 
-  /** Executes a valid gesture and closes the gesture hint. */
+  /**
+   * Executes a valid gesture and shows command palette after completion (training mode only).
+   *
+   * This function handles gesture completion and ensures the command palette only
+   * appears after the gesture is finished, not during gesture progress. This
+   * provides a cleaner user experience where users see available commands when
+   * they're done gesturing, not while they're still in the middle of it.
+   */
   handleGestureEnd: ({ sequence, e }: { sequence: GesturePath | null; e: GestureResponderEvent }) => {
     const state = store.getState()
 
     // Get the command from the command gesture index.
-    // When the command palette  is displayed, disable gesture aliases (i.e. gestures hidden from instructions). This is because the gesture hints are meant only as an aid when entering gestures quickly.
+    // When the command palette is displayed, disable gesture aliases (i.e. gestures hidden from instructions).
+    // This is because the gesture hints are meant only as an aid when entering gestures quickly.
 
     const openGestureCheatsheetGesture = gestureString(openGestureCheatsheetCommand)
 
@@ -272,11 +285,36 @@ export const inputHandlers = (store: Store<State, any>) => ({
       if (store.getState().enableLatestCommandsDiagram) store.dispatch(showLatestCommands(command))
     }
 
-    // if no command was found, execute the cancel command
+    const experienceMode = getUserSetting(state, Settings.experienceMode)
 
-    // clear gesture hint
-    clearTimeout(commandPaletteGesture)
-    commandPaletteGesture = undefined // clear the timer to track when it is running for handleGestureSegment
+    // Show command palette after gesture completion (training mode only)
+    // This ensures command palette appears when user is done gesturing, not during
+    if (
+      !experienceMode &&
+      // ignore back/forward gestures
+      command?.id !== 'cursorBack' &&
+      command?.id !== 'cursorForward'
+    ) {
+      // Clear any existing command palette timer
+      clearTimeout(commandPaletteGesture)
+      commandPaletteGesture = undefined
+
+      // Show command palette immediately after gesture completion
+      store.dispatch((dispatch, getState) => {
+        const state = getState()
+        if (state.showCommandPalette) return
+        dispatch(commandPalette())
+      })
+
+      // Set up delayed command palette display
+      commandPaletteGesture = window.setTimeout(() => {
+        store.dispatch((dispatch, getState) => {
+          const state = getState()
+          if (!state.showCommandPalette) return
+          dispatch(commandPalette())
+        })
+      }, COMMAND_PALETTE_TIMEOUT)
+    }
 
     // In experienced mode, close the alert.
     // In training mode, convert CommandPaletteGesture back to GestureHint on gesture end.
@@ -285,22 +323,17 @@ export const inputHandlers = (store: Store<State, any>) => ({
       store.dispatch((dispatch, getState) => {
         const state = getState()
         const alertType = state.alert?.alertType
-        const experienceMode = getUserSetting(Settings.experienceMode)
-        if (alertType === AlertType.GestureHint || state.showCommandPalette) {
-          if (state.showCommandPalette) {
-            dispatch(commandPalette())
-          } else {
-            dispatch(
-              alert(
-                // clear alert if gesture is cancelled (no command)
-                // clear alert if back/forward
-                !experienceMode && command && command?.id !== 'cursorForward' && command?.id !== 'cursorBack'
-                  ? command.label
-                  : null,
-                { alertType: AlertType.GestureHint, clearDelay: 5000 },
-              ),
-            )
-          }
+        if (alertType === AlertType.GestureHint) {
+          dispatch(
+            alert(
+              // Keep gesture hint for valid commands (except back/forward)
+              // Clear hint for invalid commands or back/forward gestures
+              !experienceMode && command && command?.id !== 'cursorForward' && command?.id !== 'cursorBack'
+                ? command.label
+                : null,
+              { alertType: AlertType.GestureHint, clearDelay: 5000 },
+            ),
+          )
         }
       })
     })
