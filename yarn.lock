@@ -2025,12 +2025,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@capacitor/android@npm:^7.4.3":
-  version: 7.4.3
-  resolution: "@capacitor/android@npm:7.4.3"
+"@capacitor/android@npm:^7.4.4":
+  version: 7.4.4
+  resolution: "@capacitor/android@npm:7.4.4"
   peerDependencies:
     "@capacitor/core": ^7.4.0
-  checksum: 10c0/1342df79c1c25ae7071f486ffd3eafb70ae2a56efe6a58db02ab06dc00134eb484bd2974e8cb02b59940c4e40df2ec15dd5fcf56f0ef9fd438f73d9ecfdfdf19
+  checksum: 10c0/c7fb87a6bdbb0aae0a6b181d052332f7a3d08f247e0c3540aa75d4bdf310106809cbd04622a968ef9ce69931b054bc5608f045858ee4309b2cc880de9060fd4d
   languageName: node
   linkType: hard
 
@@ -9151,7 +9151,7 @@ __metadata:
   dependencies:
     "@babel/core": "npm:^7.28.4"
     "@babel/plugin-proposal-private-property-in-object": "npm:^7.21.11"
-    "@capacitor/android": "npm:^7.4.3"
+    "@capacitor/android": "npm:^7.4.4"
     "@capacitor/cli": "npm:^7.4.3"
     "@capacitor/clipboard": "npm:^7.0.2"
     "@capacitor/core": "npm:^7.4.3"
@@ -20838,7 +20838,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "webview-background@workspace:packages/webview"
   dependencies:
-    "@capacitor/android": "npm:^7.4.3"
+    "@capacitor/android": "npm:^7.4.4"
     "@capacitor/core": "npm:^7.4.3"
     "@capacitor/docgen": "npm:^0.3.0"
     "@capacitor/ios": "npm:^7.4.3"

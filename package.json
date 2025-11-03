@@ -80,7 +80,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "@capacitor/android": "^7.4.3",
+    "@capacitor/android": "^7.4.4",
     "@capacitor/clipboard": "^7.0.2",
     "@capacitor/core": "^7.4.3",
     "@capacitor/haptics": "^7.0.2",

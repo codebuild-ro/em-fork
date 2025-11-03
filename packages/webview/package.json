@@ -40,7 +40,7 @@
     "prepublishOnly": "yarn build"
   },
   "devDependencies": {
-    "@capacitor/android": "^7.4.3",
+    "@capacitor/android": "^7.4.4",
     "@capacitor/core": "^7.4.3",
     "@capacitor/docgen": "^0.3.0",
     "@capacitor/ios": "^7.4.3",
