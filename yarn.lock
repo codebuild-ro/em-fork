@@ -2172,12 +2172,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@capacitor/haptics@npm:^7.0.2":
-  version: 7.0.2
-  resolution: "@capacitor/haptics@npm:7.0.2"
+"@capacitor/haptics@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "@capacitor/haptics@npm:8.0.0"
   peerDependencies:
-    "@capacitor/core": ">=7.0.0"
-  checksum: 10c0/1756a80c205daaded385e13031558db178760961f5dd310002dbdf21bdd021368b4c20c85be7b903346191b463d8b755f75d76d5690350fe53a3a4935814ee34
+    "@capacitor/core": ">=8.0.0"
+  checksum: 10c0/3d9f0b7925c11fb11ca095de78fa6c2785e86fdc198262082858f01af44205484d307ab442ba03aec24df0ab93c8b962c88919e197f867c2a3f5d3abcd30f0ae
   languageName: node
   linkType: hard
 
@@ -9733,7 +9733,7 @@ __metadata:
     "@capacitor/cli": "npm:^7.4.4"
     "@capacitor/clipboard": "npm:^7.0.2"
     "@capacitor/core": "npm:^7.4.4"
-    "@capacitor/haptics": "npm:^7.0.2"
+    "@capacitor/haptics": "npm:^8.0.0"
     "@capacitor/ios": "npm:^7.4.4"
     "@capacitor/keyboard": "npm:^7.0.3"
     "@capacitor/status-bar": "npm:^7.0.3"
