@@ -134,10 +134,13 @@ const ResponderView: React.FC<ResponderViewProps> = ({ children, panHandlers, ..
 
   const { style, ...otherProps } = props
 
-  // Layout-transparent wrapper - only handles touch events without affecting layout.
-  // No flex or positioning styles to avoid layout shifts.
+  // Match react-native-web's View defaults for consistent cross-platform touch behavior.
+  // touch-action: manipulation is critical on iOS — it eliminates the 300ms tap delay
+  // and standardizes how the browser handles touch sequences, preventing WKWebView (Capacitor)
+  // and newer Safari versions from aggressively claiming touches for native gestures.
   const viewStyle: React.CSSProperties = {
     boxSizing: 'border-box',
+    touchAction: 'manipulation',
     ...style,
   }
 
