@@ -105,13 +105,10 @@ const ResponderView: React.FC<ResponderViewProps> = ({ children, panHandlers, ..
      */
     const handleClickCapture = (e: MouseEvent) => {
       if (panHandlers.onClickCapture) {
-        // Convert DOM MouseEvent to React MouseEvent format
-        const reactEvent = {
-          ...e,
-          currentTarget: e.currentTarget as HTMLElement,
-          target: e.target as HTMLElement,
-        } as unknown as React.MouseEvent<HTMLElement>
-        panHandlers.onClickCapture(reactEvent)
+        // Cast native MouseEvent directly rather than spreading it.
+        // Spreading a native event object does not copy prototype methods
+        // (stopPropagation, preventDefault), which causes TypeError on iOS.
+        panHandlers.onClickCapture(e as unknown as React.MouseEvent<HTMLElement>)
       }
     }
 
